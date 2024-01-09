@@ -21,7 +21,6 @@ export async function GET() {
             message: "Random question fetch successful",
         }, { status: 200 });
     } catch (err) {
-        console.error(err);
         return NextResponse.json({
             status: "error",
             message: "Internal server error occurred.",
@@ -66,7 +65,6 @@ export async function POST(request: NextRequest) {
             message: "Question saved successfully",
         }, { status: 200 });
     } catch (err) {
-        console.error(err);
         return NextResponse.json({
             status: "error",
             message: "Internal server error occurred.",

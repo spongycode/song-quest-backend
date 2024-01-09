@@ -4,7 +4,7 @@ export async function GET(request: NextRequest) {
     try {
         return NextResponse.json({
             status: "success",
-            message: "Server is up and running.",
+            message: "Server is up and running. 📱",
         }, { status: 200 });
     } catch (err) {
         console.error("Health check failed:", err);
