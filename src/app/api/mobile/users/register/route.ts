@@ -5,13 +5,13 @@ import bcryptjs from "bcryptjs";
 import { sendEmail } from "@/helpers/mailer";
 
 
-connect()
+connect();
 
 
 export async function POST(request: NextRequest) {
     try {
-        const reqBody = await request.json()
-        const { fullName, username, email, password } = reqBody
+        const reqBody = await request.json();
+        const { fullName, username, email, password } = reqBody;
 
         if ([fullName, email, username, password].some((field) => field?.trim() === "")) {
             return NextResponse.json({
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
         }
 
 
-        let user = await User.findOne({ username: username })
+        let user = await User.findOne({ username: username });
         if (user) {
             return NextResponse.json({
                 status: "error",
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
             }, { status: 409 });
         }
 
-        user = await User.findOne({ email: email })
+        user = await User.findOne({ email: email });
 
         if (user) {
             return NextResponse.json({
@@ -38,8 +38,8 @@ export async function POST(request: NextRequest) {
             }, { status: 409 });
         }
 
-        const salt = await bcryptjs.genSalt(10)
-        const hashedPassword = await bcryptjs.hash(password, salt)
+        const salt = await bcryptjs.genSalt(10);
+        const hashedPassword = await bcryptjs.hash(password, salt);
 
 
         user = await User.create({
@@ -47,18 +47,18 @@ export async function POST(request: NextRequest) {
             username,
             email,
             password: hashedPassword
-        })
+        });
 
-        const savedUser = await User.findById(user._id).select("_id fullName username email")
+        const savedUser = await User.findById(user._id).select("_id fullName username email");
 
 
-        await sendEmail({ email, emailType: "VERIFY", userId: savedUser._id })
+        await sendEmail({ email, emailType: "VERIFY", userId: savedUser._id });
 
         return NextResponse.json({
             status: "success",
             message: "User created successfully",
             data: savedUser
-        }, { status: 201 })
+        }, { status: 201 });
     } catch (error: any) {
         return NextResponse.json({
             status: "error",
