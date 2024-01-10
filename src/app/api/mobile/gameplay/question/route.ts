@@ -4,23 +4,52 @@ import { v4 as uuidv4 } from "uuid";
 import { initializeFirebaseApp } from "@/dbConfig/firebaseConfig";
 import { connect } from "@/dbConfig/mongooseConfig";
 import Question from "@/models/question";
-
+import Game from "@/models/game";
 
 const { storage } = initializeFirebaseApp();
 
 connect();
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
+        const accessToken = request.nextUrl.searchParams.get('accessToken');
+        const gameId = request.nextUrl.searchParams.get('gameId');
+        const count = Number(request.nextUrl.searchParams.get('count'));
 
-        const questions = await Question.find();
+        if (!accessToken || !gameId || !count || count === 0) {
+            return NextResponse.json({
+                status: "error",
+                message: "Invalid input format",
+            }, { status: 400 });
+        }
+
+        const game = await Game.findById(gameId);
+        const category = game.category;
+
+        let questions = await Question.find({
+            category,
+            _id: { $nin: game.questionsId }
+        }).limit(count).select("-correctOptionId -totalAttempts -difficulty -altText");
+
+        let isMoreQuestion = true;
+        if (questions.length < count) {
+            isMoreQuestion = false;
+        }
+
+        game.questionsId.push(...questions);
+        game.save();
 
         return NextResponse.json({
             status: "success",
-            data: questions,
-            message: "Random question fetch successful",
+            message: "Question fetched successfully",
+            data: {
+                game,
+                isMoreQuestion,
+                questions
+            }
         }, { status: 200 });
-    } catch (err) {
+
+    } catch (error: any) {
         return NextResponse.json({
             status: "error",
             message: "Internal server error occurred.",

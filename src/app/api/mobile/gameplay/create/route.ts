@@ -10,9 +10,9 @@ connect();
 export async function POST(request: NextRequest) {
     try {
         const reqBody = await request.json();
-        const { accessToken, category } = reqBody;
+        const { accessToken, category, count } = reqBody;
 
-        if (!accessToken || !category) {
+        if (!accessToken || !category || !count || count === 0) {
             return NextResponse.json({
                 status: "error",
                 message: "Invalid input format",
@@ -31,7 +31,13 @@ export async function POST(request: NextRequest) {
             }, { status: 401 });
         }
 
-        const questions = await Question.find().select("-correctOptionId -totalAttempts -incorrectAttempts -altText");
+        const questions = await Question.find({ category }).limit(count).select("-correctOptionId -totalAttempts -difficulty -altText");
+
+        let isMoreQuestion = true;
+        if (questions.length < count) {
+            isMoreQuestion = false;
+        }
+
         const game = await Game.create({
             player: user._id,
             questionsId: questions,
@@ -43,6 +49,7 @@ export async function POST(request: NextRequest) {
             message: "Game created successfully",
             data: {
                 game,
+                isMoreQuestion,
                 questions
             }
         }, { status: 201 });
