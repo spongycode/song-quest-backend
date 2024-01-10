@@ -17,11 +17,28 @@ const gameSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    isGameSaved: {
+        type: Boolean,
+        default: false
+    },
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    expireAt: {
+        type: Date,
+        default: Date.now() + 3600000 // 1 hour
     }
 })
+
+gameSchema.index(
+    { expireAt: 1 },
+    {
+        name: "unsaved-deletion",
+        partialFilterExpression: { isGameSaved: false },
+        expireAfterSeconds: 0
+    }
+);
 
 const Game = mongoose.models.games || mongoose.model("games", gameSchema);
 
