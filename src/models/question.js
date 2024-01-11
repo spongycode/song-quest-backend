@@ -32,12 +32,9 @@ const questionSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    incorrectAttempts: {
+    difficulty: {
         type: Number,
-        default: 0
-    },
-    level: {
-        type: Number
+        default: 0.5
     },
     altText: {
         type: String,

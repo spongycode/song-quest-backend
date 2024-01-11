@@ -3,31 +3,36 @@ import { NextRequest, NextResponse } from "next/server";
 import User from "@/models/user";
 import { emailType } from "@/constants/emailTypes";
 import { sendEmail } from "@/helpers/mailer";
+import jwt from "jsonwebtoken";
 
 connect()
 
 export async function GET(request: NextRequest) {
     try {
-        const token = request.nextUrl.searchParams.get('token');
+        const accessToken = request.nextUrl.searchParams.get('accessToken');
 
-        const user = await User.findOne({
-            verifyEmailToken: token,
-            verifyEmailTokenExpiry: { $gt: Date.now() }
-        });
+        if (!accessToken) {
+            return NextResponse.json({
+                status: "error",
+                message: "Invalid input format",
+            }, { status: 400 });
+        }
+
+        const decodedToken: any = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET!);
+        const userId = decodedToken._id;
+
+
+        const user = await User.findById(userId);
 
         if (user) {
             if (user.isEmailVerfied === false) {
                 const email = user.email;
-                await sendEmail({ email, type: emailType.ONBOARD_EMAIL, user });
+                await sendEmail({ email, type: emailType.VERIFY_EMAIL, user });
             }
-            user.isEmailVerfied = true;
-            user.verifyEmailToken = undefined;
-            user.verifyEmailTokenExpiry = undefined;
-            await user.save();
 
             return NextResponse.json({
                 status: "success",
-                message: "Email verified successfully",
+                message: "Email has been sent successfully"
             }, { status: 200 })
         } else {
             return NextResponse.json({
@@ -36,6 +41,7 @@ export async function GET(request: NextRequest) {
             }, { status: 401 })
         }
     } catch (error: any) {
+
         return NextResponse.json({
             status: "error",
             message: "Internal server error occurred.",

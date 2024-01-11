@@ -1,0 +1,5 @@
+export enum emailType {
+    VERIFY_EMAIL = "VERIFY-EMAIL",
+    RESET_PASSWORD = "RESET-PASSWORD",
+    ONBOARD_EMAIL = "ONBOARD-EMAIL",
+}
