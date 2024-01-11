@@ -3,10 +3,9 @@ import User from "@/models/user";
 import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
 import { sendEmail } from "@/helpers/mailer";
-
+import { emailType } from "@/constants/emailTypes";
 
 connect();
-
 
 export async function POST(request: NextRequest) {
     try {
@@ -19,7 +18,6 @@ export async function POST(request: NextRequest) {
                 message: "Please fill all fields.",
             }, { status: 400 });
         }
-
 
         let user = await User.findOne({ username: username });
         if (user) {
@@ -51,8 +49,7 @@ export async function POST(request: NextRequest) {
 
         const savedUser = await User.findById(user._id).select("_id fullName username email");
 
-
-        await sendEmail({ email, emailType: "VERIFY", userId: savedUser._id });
+        await sendEmail({ email, type: emailType.VERIFY_EMAIL, user: savedUser });
 
         return NextResponse.json({
             status: "success",
