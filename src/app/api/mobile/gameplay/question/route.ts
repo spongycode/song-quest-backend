@@ -5,6 +5,9 @@ import { initializeFirebaseApp } from "@/dbConfig/firebaseConfig";
 import { connect } from "@/dbConfig/mongooseConfig";
 import Question from "@/models/question";
 import Game from "@/models/game";
+import User from "@/models/user";
+import jwt from "jsonwebtoken";
+
 
 const { storage } = initializeFirebaseApp();
 
@@ -23,13 +26,24 @@ export async function GET(request: NextRequest) {
             }, { status: 400 });
         }
 
+        const decodedToken: any = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET!);
+        const userId = decodedToken._id;
+
+        const user = await User.findById(userId);
         const game = await Game.findById(gameId);
         const category = game.category;
+
+        if (!user || !game || !user._id.equals(game.player)) {
+            return NextResponse.json({
+                status: "error",
+                message: "Invalid combination of user and game",
+            }, { status: 400 });
+        }
 
         let questions = await Question.find({
             category,
             _id: { $nin: game.questionsId }
-        }).limit(count).select("-correctOptionId -totalAttempts -difficulty -altText");
+        }).limit(count).sort({ difficulty: 1 }).select("-correctOptionId -totalAttempts -difficulty -altText");
 
         let isMoreQuestion = true;
         if (questions.length < count) {

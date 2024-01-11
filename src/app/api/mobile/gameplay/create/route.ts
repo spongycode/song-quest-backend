@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
             }, { status: 401 });
         }
 
-        const questions = await Question.find({ category }).limit(count).select("-correctOptionId -totalAttempts -difficulty -altText");
+        const questions = await Question.find({ category }).limit(count).sort({ difficulty: 1 }).select("-correctOptionId -totalAttempts -difficulty -altText");
 
         let isMoreQuestion = true;
         if (questions.length < count) {
