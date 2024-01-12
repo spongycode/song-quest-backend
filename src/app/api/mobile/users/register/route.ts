@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
 import { sendEmail } from "@/helpers/mailer";
 import { emailType } from "@/constants/emailTypes";
+import jwt from "jsonwebtoken";
 
 connect();
 
@@ -51,10 +52,22 @@ export async function POST(request: NextRequest) {
 
         await sendEmail({ email, type: emailType.VERIFY_EMAIL, user: savedUser });
 
+        const accessToken = generateAccessToken(user);
+        const refreshToken = generateRefreshToken(user._id);
+
         return NextResponse.json({
             status: "success",
             message: "User created successfully",
-            data: savedUser
+            data: {
+                accessToken,
+                refreshToken,
+                user: {
+                    _id: savedUser._id,
+                    fullName: savedUser.fullName,
+                    username: savedUser.username,
+                    email: savedUser.email
+                }
+            }
         }, { status: 201 });
     } catch (error: any) {
         return NextResponse.json({
@@ -62,4 +75,23 @@ export async function POST(request: NextRequest) {
             message: "Internal server error occurred.",
         }, { status: 500 });
     }
+}
+
+const generateAccessToken = (user: any) => {
+    return jwt.sign({
+        _id: user._id,
+        email: user.email,
+        username: user.username,
+        fullName: user.fullName
+    },
+        process.env.ACCESS_TOKEN_SECRET!, {
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+    });
+}
+
+const generateRefreshToken = (userId: String) => {
+    return jwt.sign({ _id: userId, },
+        process.env.REFRESH_TOKEN_SECRET!, {
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+    });
 }
