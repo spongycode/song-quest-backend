@@ -27,7 +27,7 @@ const gameSchema = new mongoose.Schema({
     },
     expireAt: {
         type: Date,
-        default: Date.now() + 3600000 // 1 hour
+        default: Date.now() + 60000 // 1 minute
     }
 })
 
