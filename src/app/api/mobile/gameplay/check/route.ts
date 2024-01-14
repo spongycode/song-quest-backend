@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
         question.difficulty = newDifficulty;
         question.save();
 
-        game.expireAt = Date.now() + 60000;
+        game.expireAt = Date.now();
         game.save();
 
         return NextResponse.json({

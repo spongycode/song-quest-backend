@@ -23,11 +23,11 @@ const gameSchema = new mongoose.Schema({
     },
     createdAt: {
         type: Date,
-        default: Date.now
+        default: Date.now()
     },
     expireAt: {
         type: Date,
-        default: Date.now() + 60000 // 1 minute
+        default: Date.now()
     }
 })
 
@@ -36,7 +36,7 @@ gameSchema.index(
     {
         name: "unsaved-deletion",
         partialFilterExpression: { isGameSaved: false },
-        expireAfterSeconds: 0
+        expireAfterSeconds: 180
     }
 );
 
