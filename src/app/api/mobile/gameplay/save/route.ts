@@ -34,13 +34,15 @@ export async function POST(request: NextRequest) {
         game.isGameSaved = true;
         await game.save();
 
-        user.gamesPlayed++;
+        const gamesPlayed = await Game.countDocuments({ player: userId, isGameSaved: true });
+        user.gamesPlayed = gamesPlayed;
         await user.save();
 
         return NextResponse.json({
             status: "success",
             message: "Game saved successfully",
             data: {
+                gamesPlayed,
                 game
             }
         }, { status: 201 });
