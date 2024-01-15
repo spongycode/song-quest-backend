@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
             password: hashedPassword
         });
 
-        const savedUser = await User.findById(user._id).select("_id username email gamesPlayed");
+        const savedUser = await User.findById(user._id).select("_id username email");
 
         await sendEmail({ email, type: emailType.VERIFY_EMAIL, user: savedUser });
 

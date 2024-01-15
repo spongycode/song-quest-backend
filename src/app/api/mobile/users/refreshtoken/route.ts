@@ -43,9 +43,9 @@ export async function POST(request: NextRequest) {
                 refreshToken: newRefreshToken,
                 user: {
                     _id: user._id,
-                    fullName: user.fullName,
                     username: user.username,
-                    email: user.email
+                    email: user.email,
+                    gamesPlayed: user.gamesPlayed
                 }
             }
         }, { status: 200 });
@@ -63,7 +63,6 @@ const generateAccessToken = (user: any) => {
         _id: user._id,
         email: user.email,
         username: user.username,
-        fullName: user.fullName
     },
         process.env.ACCESS_TOKEN_SECRET!, {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRY
