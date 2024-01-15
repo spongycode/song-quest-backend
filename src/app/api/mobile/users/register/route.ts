@@ -11,9 +11,9 @@ connect();
 export async function POST(request: NextRequest) {
     try {
         const reqBody = await request.json();
-        const { fullName, username, email, password } = reqBody;
+        const { username, email, password } = reqBody;
 
-        if ([fullName, email, username, password].some((field) => field?.trim() === "")) {
+        if ([email, username, password].some((field) => field?.trim() === "")) {
             return NextResponse.json({
                 status: "error",
                 message: "Please fill all fields.",
@@ -42,13 +42,12 @@ export async function POST(request: NextRequest) {
 
 
         user = await User.create({
-            fullName,
             username,
             email,
             password: hashedPassword
         });
 
-        const savedUser = await User.findById(user._id).select("_id fullName username email");
+        const savedUser = await User.findById(user._id).select("_id username email gamesPlayed");
 
         await sendEmail({ email, type: emailType.VERIFY_EMAIL, user: savedUser });
 
@@ -63,7 +62,6 @@ export async function POST(request: NextRequest) {
                 refreshToken,
                 user: {
                     _id: savedUser._id,
-                    fullName: savedUser.fullName,
                     username: savedUser.username,
                     email: savedUser.email
                 }
@@ -81,8 +79,7 @@ const generateAccessToken = (user: any) => {
     return jwt.sign({
         _id: user._id,
         email: user.email,
-        username: user.username,
-        fullName: user.fullName
+        username: user.username
     },
         process.env.ACCESS_TOKEN_SECRET!, {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRY

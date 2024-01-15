@@ -34,6 +34,9 @@ export async function POST(request: NextRequest) {
         game.isGameSaved = true;
         await game.save();
 
+        user.gamesPlayed++;
+        await user.save();
+
         return NextResponse.json({
             status: "success",
             message: "Game saved successfully",

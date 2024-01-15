@@ -51,9 +51,9 @@ export async function POST(request: NextRequest) {
                 refreshToken,
                 user: {
                     _id: user._id,
-                    fullName: user.fullName,
                     username: user.username,
-                    email: user.email
+                    email: user.email,
+                    gamesPlayed: user.gamesPlayed
                 }
             }
         }, { status: 200 });

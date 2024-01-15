@@ -14,11 +14,6 @@ const userSchema = new mongoose.Schema({
         unique: true,
         trim: true,
     },
-    fullName: {
-        type: String,
-        required: true,
-        trim: true,
-    },
     imageUrl: {
         type: String,
     },
@@ -29,6 +24,10 @@ const userSchema = new mongoose.Schema({
     isEmailVerfied: {
         type: Boolean,
         default: false,
+    },
+    gamesPlayed: {
+        type: Number,
+        default: 0
     },
     createdAt: {
         type: Date,
