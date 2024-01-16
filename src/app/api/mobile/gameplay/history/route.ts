@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
         const decodedToken: any = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET!);
         const userId = decodedToken._id;
 
-        const games = await Game.find({ player: userId, isGameSaved: true }).select("-isGameSaved -expireAt");
+        const games = await Game.find({ player: userId, isGameSaved: true }).select("-isGameSaved -expireAt").sort({ createdAt: -1 });
 
         return NextResponse.json({
             status: "success",
