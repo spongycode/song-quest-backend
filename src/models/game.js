@@ -9,6 +9,10 @@ const gameSchema = new mongoose.Schema({
         type: Number,
         default: 0.0
     },
+    accurate: {
+        type: Number,
+        default: 0
+    },
     questionsId: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Question"

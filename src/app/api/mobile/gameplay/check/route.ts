@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
         if (question.correctOptionId === optionId) {
             score = Math.max(0, Number(process.env.CORRECT_OFFSET) * (1 - timeTaken / Number(process.env.TOTAL_TIME_PER_QUESTION)));
             isCorrect = true;
+            game.accurate++;
             game.score += score;
             await game.save();
         }
