@@ -36,7 +36,7 @@ const getEmailSubject = (type: emailType) => {
 };
 
 
-const getEmailBody = (type: emailType, hashedToken: string): string => {
+const getEmailBody = (type: emailType, hashedToken: string, otp: string): string => {
     switch (type) {
         case emailType.VERIFY_EMAIL:
             return `<p>To complete your email verification, please click <a href="${process.env.DOMAIN}/api/mobile/users/verifyemail?token=${hashedToken}">here</a> 
@@ -44,10 +44,7 @@ const getEmailBody = (type: emailType, hashedToken: string): string => {
                     <br> ${process.env.DOMAIN}/api/mobile/users/verifyemail?token=${hashedToken}
                     </p>`;
         case emailType.RESET_PASSWORD:
-            return `<p>To reset your password, click <a href="${process.env.DOMAIN}/api/mobile/users/password?token=${hashedToken}">here</a> 
-                    or copy and paste the following link into your browser: 
-                    <br> ${process.env.DOMAIN}/api/mobile/users/password?token=${hashedToken}
-                    </p>`;
+            return `<p>Your OTP: ${otp}</p>`;
         case emailType.ONBOARD_EMAIL:
             return `<p>Thank you for verifying your email. You can now contribute your unique set of questions, shaping the experience for all users, including yourself.
                     <p>Get ready to explore and make your mark! 🚀</p>`;
@@ -59,7 +56,13 @@ const getEmailBody = (type: emailType, hashedToken: string): string => {
 
 export const sendEmail = async ({ email, type, user }: any) => {
     try {
-        const hashedToken = await bcryptjs.hash(user._id.toString(), 10);
+        let otp = "";
+        if (type === emailType.RESET_PASSWORD) {
+            otp = generateOTP();
+        }
+        const hashedToken = (type === emailType.VERIFY_EMAIL) ?
+            await bcryptjs.hash(user._id.toString(), 10) :
+            await bcryptjs.hash(email.toString() + otp, 10);
 
         await emailTypeActions(type, user, hashedToken);
 
@@ -77,7 +80,7 @@ export const sendEmail = async ({ email, type, user }: any) => {
             from: process.env.GMAIL_USER,
             to: email,
             subject: getEmailSubject(type),
-            html: getEmailBody(type, hashedToken),
+            html: getEmailBody(type, hashedToken, otp),
         };
 
         await transport.sendMail(mailOptions);
@@ -85,3 +88,9 @@ export const sendEmail = async ({ email, type, user }: any) => {
         throw new Error(error.message);
     }
 };
+
+
+const generateOTP = () => {
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    return otp;
+}
