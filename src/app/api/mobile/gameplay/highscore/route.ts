@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
             }, { status: 400 });
         }
 
-        const categoryScores: any = {};
+        const categoryScores: any[] = [];
 
         for (const category of categories) {
             const topScores = await Game.find({ category })
@@ -41,13 +41,31 @@ export async function POST(request: NextRequest) {
                     model: 'users',
                     select: 'username',
                 })
-                .select("player score");
+                .select("player score accurate createdAt");
 
-            categoryScores[category] = topScores.map(({ player, score }) => ({
-                username: player.username,
-                score,
-            }));
+            const userScores: any = topScores.reduce((acc, { player, score, accurate, createdAt }) => {
+                const username = player.username;
+
+                if (!acc[username] || score > acc[username].score) {
+                    acc[username] = {
+                        username,
+                        score,
+                        accurate,
+                        createdAt,
+                    };
+                }
+
+                return acc;
+            }, {});
+
+            const categoryData = {
+                category,
+                users: Object.values(userScores),
+            };
+
+            categoryScores.push(categoryData);
         }
+
         return NextResponse.json({
             status: "success",
             message: "Category wise high score",
