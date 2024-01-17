@@ -7,17 +7,24 @@ connect()
 
 export async function POST(request: NextRequest) {
     try {
-        const { token, password } = await request.json();
+        const { email, otp, password } = await request.json();
 
-        const user = await User.findOne({
-            forgotPasswordToken: token,
-            forgotPasswordTokenExpiry: { $gt: Date.now() }
-        });
+        const user = await User.findOne({ email });
 
         if (!user) {
             return NextResponse.json({
                 status: "error",
                 message: "Error updating password.",
+            }, { status: 400 });
+        }
+
+        const str = email + otp;
+        const validOTP = await bcryptjs.compare(str, user.forgotPasswordToken);
+
+        if (!validOTP) {
+            return NextResponse.json({
+                status: "error",
+                message: "Invalid OTP",
             }, { status: 400 });
         }
 
@@ -35,6 +42,9 @@ export async function POST(request: NextRequest) {
         }, { status: 200 });
 
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        return NextResponse.json({
+            status: "error",
+            message: "Internal server error occurred.",
+        }, { status: 500 });
     }
 }
