@@ -40,7 +40,7 @@ gameSchema.index(
     {
         name: "unsaved-deletion",
         partialFilterExpression: { isGameSaved: false },
-        expireAfterSeconds: 180
+        expireAfterSeconds: 300
     }
 );
 
