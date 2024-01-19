@@ -135,7 +135,7 @@ const getEmailBody = (type: emailType, hashedToken: string, otp: string, user: a
                 <div class="welcome-container">
                     <h3>Hi ${user.username},</h3>
                     <p>Welcome to <b>Song Quest 🚀</b></p>
-                    <p>Thank you for singin up. I am excited to have you on board. Get ready to immerse yourself in the world of music and make your mark as a Song Quester!</p>
+                    <p> Thank you for signing up. I am excited to have you on board. Get ready to immerse yourself in the world of music and make your mark as a Song Quester!</p>
                     <p>If you have any questions or need assistance, feel free to reply to this mail.</p>
                     <p>Happy questing with Song Quest!</p>
                     <p>By the way, did you know this project is open source? You can check out the code on the GitHub repository <a href="https://github.com/spongycode/song-quest" target="_blank">here</a>.</p>
