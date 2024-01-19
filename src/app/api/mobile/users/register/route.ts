@@ -49,7 +49,8 @@ export async function POST(request: NextRequest) {
 
         const savedUser = await User.findById(user._id).select("_id username email");
 
-        await sendEmail({ email, type: emailType.VERIFY_EMAIL, user: savedUser });
+        // await sendEmail({ email, type: emailType.VERIFY_EMAIL, user: savedUser });
+        await sendEmail({ email, type: emailType.NORMAL_WELCOME, user: savedUser });
 
         const accessToken = generateAccessToken(user);
         const refreshToken = generateRefreshToken(user._id);

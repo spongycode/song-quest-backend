@@ -2,6 +2,7 @@ import Question from "@/models/question";
 import Game from "@/models/game";
 import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbConfig/mongooseConfig";
+import { calculateScore } from "@/helpers/score";
 
 connect();
 
@@ -24,21 +25,15 @@ export async function POST(request: NextRequest) {
         let isCorrect = false;
 
         if (question.correctOptionId === optionId) {
-            score = Math.max(0, Number(process.env.CORRECT_OFFSET) * (1 - timeTaken / Number(process.env.TOTAL_TIME_PER_QUESTION)));
+            score = calculateScore(Number(timeTaken));
             isCorrect = true;
             game.accurate++;
             game.score += score;
             await game.save();
         }
 
-        let newDifficulty =
-            1 - (
-                (question.totalAttempts * question.difficulty + score / Number(process.env.CORRECT_OFFSET)) /
-                (question.totalAttempts + 1)
-            );
 
         question.totalAttempts += 1;
-        question.difficulty = newDifficulty;
         question.save();
 
         game.expireAt = Date.now();
