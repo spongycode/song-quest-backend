@@ -6,8 +6,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Spacee Gemini',
-  description: 'Talk, create, discover with AI.',
+  title: 'Song Quest',
+  description: 'Android quiz game featuring audio challenges.',
 }
 
 export default function RootLayout({
