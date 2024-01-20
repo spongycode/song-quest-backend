@@ -87,19 +87,8 @@ export async function POST(request: NextRequest) {
             throw new Error("File is missing");
         }
 
-        const { title, options, correctOptionId, category, altText, accessToken } = JSON.parse(details as string);
+        const { title, options, correctOptionId, category, altText } = JSON.parse(details as string);
 
-        const decodedToken: any = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET!);
-        const userId = decodedToken._id;
-
-
-        const user = await User.findById(userId);
-        if (user.email !== process.env.ADMIN_EMAIL) {
-            return NextResponse.json({
-                status: "error",
-                message: "You are unauthorized",
-            }, { status: 400 });
-        }
 
         const snapshot = await uploadBytes(storageRef, file, metadata);
         const songUrl = await getDownloadURL(snapshot.ref);
