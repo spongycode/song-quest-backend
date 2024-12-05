@@ -51,8 +51,6 @@ export async function PATCH(request: NextRequest) {
             }
         }, { status: 201 });
     } catch (error: any) {
-        console.log(error);
-
         return NextResponse.json({
             status: "error",
             message: "Internal server error occurred.",
