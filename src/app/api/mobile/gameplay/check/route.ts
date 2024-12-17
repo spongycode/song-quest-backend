@@ -9,7 +9,7 @@ connect();
 export async function POST(request: NextRequest) {
     try {
         const reqBody = await request.json();
-        const { gameId, questionId, optionId, timeTaken } = reqBody;
+        const { gameId, questionId, answer, timeTaken } = reqBody;
         const question = await Question.findById(questionId);
         const game = await Game.findById(gameId);
 
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
         let score = 0;
         let isCorrect = false;
 
-        if (question.correctOptionId === optionId) {
+        if (question.answer === answer) {
             score = calculateScore(Number(timeTaken));
             isCorrect = true;
             game.accurate++;

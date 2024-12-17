@@ -8,25 +8,18 @@ const questionSchema = new mongoose.Schema({
     songUrl: {
         type: String
     },
-    options: [
-        {
-            optionid: {
-                type: Number,
-                required: true
-            },
-            value: {
-                type: String,
-                required: true
-            }
-        }
-    ],
-    correctOptionId: {
-        type: Number,
-        required: true
+    coverUrl: {
+        type: String
+    },
+    answer: {
+        type: String
     },
     category: {
         type: String,
         required: true
+    },
+    artist: {
+        type: String
     },
     totalAttempts: {
         type: Number,

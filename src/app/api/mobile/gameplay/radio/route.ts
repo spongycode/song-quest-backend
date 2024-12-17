@@ -30,8 +30,8 @@ export async function POST(request: NextRequest) {
         }
 
         const radio = await Question.aggregate([
-            { $match: { songUrl: { $exists: true, $ne: null } } },
-            { $project: { songUrl: 1, _id: 0 } },
+            { $match: { songUrl: { $exists: true, $ne: null }, coverUrl: { $exists: true, $ne: null } } },
+            { $project: { songUrl: 1, coverUrl: 1, _id: 0 } },
             { $sample: { size: 1000000 } }
         ]);
 

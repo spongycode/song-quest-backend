@@ -78,17 +78,17 @@ export async function POST(request: NextRequest) {
         let file = formData.get("file") as File;
         const details = formData.get("details");
 
-        const storageRef = ref(storage, `${uuidv4()}.mp3`);
-        const metadata = {
-            contentType: 'audio/mp3',
-        };
-
         if (!file) {
             throw new Error("File is missing");
         }
 
-        const { title, options, correctOptionId, category, altText } = JSON.parse(details as string);
+        const { title, answer, coverUrl, category, artist, altText } = JSON.parse(details as string);
 
+        const storageRef = ref(storage, `${category}/${uuidv4() + '-' + uuidv4()}.mp3`);
+
+        const metadata = {
+            contentType: 'audio/mp3',
+        };
 
         const snapshot = await uploadBytes(storageRef, file, metadata);
         const songUrl = await getDownloadURL(snapshot.ref);
@@ -96,9 +96,10 @@ export async function POST(request: NextRequest) {
         const newQuestion = new Question({
             title,
             songUrl,
-            options,
-            correctOptionId,
+            answer,
+            coverUrl,
             category,
+            artist,
             altText
         });
 

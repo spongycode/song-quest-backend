@@ -7,12 +7,14 @@ import { connect } from "@/dbConfig/mongooseConfig";
 
 connect();
 
+const count = 25;
+
 export async function POST(request: NextRequest) {
     try {
         const reqBody = await request.json();
-        const { accessToken, category, count } = reqBody;
+        const { accessToken, category } = reqBody;
 
-        if (!accessToken || !category || !count || count === 0) {
+        if (!accessToken || !category) {
             return NextResponse.json({
                 status: "error",
                 message: "Invalid input format",
@@ -31,22 +33,49 @@ export async function POST(request: NextRequest) {
             }, { status: 401 });
         }
 
-        // const questions = await Question.find({ category }).limit(count).sort({ difficulty: 1 }).select("-correctOptionId -totalAttempts -difficulty -altText");
         const questions = await Question.aggregate([
             { $match: { category } },
-            { $sample: { size: count } },
-            { $project: { correctOptionId: 0, totalAttempts: 0, difficulty: 0, altText: 0 } }
+            { $sample: { size: count } }
         ]);
 
+        const questionsWithOptions = await Promise.all(questions.map(async (question, questionIndex) => {
+            const optionsPool = await Question.aggregate([
+                { $match: { category, _id: { $ne: question._id } } },
+                { $group: { _id: "$answer", doc: { $first: "$$ROOT" } } }, // Group by answer to ensure distinct answers
+                { $sample: { size: 3 } }
+            ]).then(results => results.map(result => result.doc));
 
-        let isMoreQuestion = true;
-        if (questions.length < count) {
-            isMoreQuestion = false;
-        }
+            const rawOptions = [...optionsPool.map(opt => ({ _id: opt._id, value: opt.answer })),
+            { _id: question._id, value: question.answer }];
+
+
+            for (let i = rawOptions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [rawOptions[i], rawOptions[j]] = [rawOptions[j], rawOptions[i]];
+            }
+
+            const options = rawOptions.map((opt, index) => ({
+                _id: opt._id.toString(),
+                optionid: index,
+                value: opt.value
+            }));
+
+            return {
+                _id: question._id,
+                title: question.title,
+                songUrl: question.songUrl,
+                coverUrl: question.coverUrl,
+                category: question.category,
+                options
+            };
+        }));
+
+        const totalQuestionsInCategory = await Question.countDocuments({ category });
+        const isMoreQuestion = totalQuestionsInCategory > count;
 
         const game = await Game.create({
             player: user._id,
-            questionsId: questions,
+            questionsId: questions.map(q => q._id),
             category
         });
 
@@ -56,7 +85,7 @@ export async function POST(request: NextRequest) {
             data: {
                 game,
                 isMoreQuestion,
-                questions
+                questions: questionsWithOptions
             }
         }, { status: 201 });
 
